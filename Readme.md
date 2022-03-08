@@ -1,7 +1,7 @@
 # Личный проект «TaskForce»
 
 * Студент: [Сергей Иншаков](https://up.htmlacademy.ru/yii/2/user/59949).
-* Наставник: `Неизвестно`.
+* Наставник: [Сергей Парфенов](https://up.htmlacademy.ru/yii/2/user/926645).
 
 ---
 
