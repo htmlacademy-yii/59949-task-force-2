@@ -5,7 +5,7 @@ class Task
 {
     public $status;
 
-    private $ownerId;
+    private $customerId;
     private $executorId;
 
     const STATUS_NEW = 'new';
@@ -20,33 +20,33 @@ class Task
     const ACTION_FINISH = 'finish';
 
     const ACTIONS_MAP = [
-        'respond' => 'Откликнуться',
-        'refuse' => 'Отказаться',
-        'cancel' => 'Отменить',
-        'finish' => 'Завершить'
+        self::ACTION_RESPOND => 'Откликнуться',
+        self::ACTION_REFUSE => 'Отказаться',
+        self::ACTION_CANCEL => 'Отменить',
+        self::ACTION_FINISH => 'Завершить'
     ];
 
     const STATUSES_MAP = [
-        'new' => 'Новое',
-        'inProgress' => 'В работе',
-        'canceled' => 'Отменено',
-        'done' => 'Выполнено',
-        'failed' => 'Провалено'
+        self::STATUS_NEW => 'Новое',
+        self::STATUS_IN_PROGRESS => 'В работе',
+        self::STATUS_CANCELED => 'Отменено',
+        self::STATUS_DONE => 'Выполнено',
+        self::STATUS_FAILED => 'Провалено'
     ];
 
-    public function __construct(int $ownerId, ?int $executorId)
+    public function __construct(int $customerId, ?int $executorId = null)
     {
-        $this->ownerId = $ownerId;
+        $this->customerId = $customerId;
         $this->executorId = $executorId;
         $this->status = self::STATUS_NEW;
     }
 
-    public function getStatusesMap()
+    private function getStatusesMap()
     {
         return self::STATUSES_MAP;
     }
 
-    public function getActionsMap()
+    private function getActionsMap()
     {
         return self::ACTIONS_MAP;
     }
@@ -56,30 +56,51 @@ class Task
         return $this->status;
     }
 
-    public function getAvailableActions()
+    public function getNewStatusByAction(string $actionType)
     {
-        return null;
+        $statusByActionList = [
+            self::ACTION_RESPOND => self::STATUS_IN_PROGRESS,
+            self::ACTION_REFUSE => self::STATUS_FAILED,
+            self::ACTION_CANCEL => self::STATUS_CANCELED,
+            self::ACTION_FINISH => self::STATUS_DONE
+        ];
+
+        return $statusByActionList[$actionType] ?? null;
     }
 
-    private function setStatusByRoleAction(string $roleType, string $actionType)
+    public function getAvailableActionsByStatusAndRoleType(string $status, string $roleType)
     {
-        if ($roleType === 'owner') {
-            if ($this->getCurrentStatus() === self::STATUS_NEW && $actionType === self::ACTIONS_MAP['cancel']) {
-                $this->status = self::STATUS_CANCELED;
-            }
-            if ($this->getCurrentStatus() === self::STATUS_IN_PROGRESS && $actionType === self::ACTIONS_MAP['finish']) {
-                $this->status = self::STATUS_DONE;
-            }
+        $customerActionsList = [
+            self::STATUS_NEW => [
+                self::ACTION_CANCEL
+            ],
+            self::STATUS_IN_PROGRESS => [
+                self::ACTION_FINISH
+            ],
+            self::STATUS_DONE => [],
+            self::STATUS_FAILED => [],
+            self::STATUS_CANCELED => []
+        ];
+
+        $executorActionsList = [
+            self::STATUS_NEW => [
+                self::ACTION_RESPOND
+            ],
+            self::STATUS_IN_PROGRESS => [
+                self::ACTION_REFUSE
+            ],
+            self::STATUS_DONE => [],
+            self::STATUS_FAILED => [],
+            self::STATUS_CANCELED => []
+        ];
+
+        if ($roleType === 'customer') {
+            return $customerActionsList[$status] ?? null;
         }
         if ($roleType === 'executor') {
-            if ($this->getCurrentStatus() === self::STATUS_NEW && $actionType === self::ACTIONS_MAP['respond']) {
-                $this->status = self::STATUS_IN_PROGRESS;
-            }
-            if ($this->getCurrentStatus() === self::STATUS_IN_PROGRESS && $actionType === self::ACTIONS_MAP['refuse']) {
-                $this->status = self::STATUS_FAILED;
-            }
+            return $executorActionsList[$status] ?? null;
         }
 
-        return $this->getCurrentStatus();
+        return null;
     }
 }
