@@ -38,4 +38,68 @@ class TaskTest extends TestCase
         $newStatus = $task->getNewStatusByAction('missing status');
         $this->assertEquals(null, $newStatus);
     }
+
+    public function testGetAvailableActionsByStatusAndUserId(): void
+    {
+        $customerId = 1;
+        $executorId = 2;
+        $randomId = 3;
+
+        $task = new Task(Task::STATUS_NEW, $customerId);
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
+        $this->assertEquals([Task::ACTION_CANCEL], $availableActions);
+
+        $task = new Task(Task::STATUS_NEW, $customerId, $executorId);
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
+        $this->assertEquals([Task::ACTION_RESPOND], $availableActions);
+
+        $task = new Task(Task::STATUS_NEW, $customerId, $executorId);
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
+        $this->assertEquals([Task::ACTION_RESPOND], $availableActions);
+
+        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId);
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
+        $this->assertEquals([Task::ACTION_FINISH], $availableActions);
+
+        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId, $executorId);
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
+        $this->assertEquals([Task::ACTION_REFUSE], $availableActions);
+
+        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId, $executorId);
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
+        $this->assertEquals([], $availableActions);
+
+        $task = new Task(Task::STATUS_CANCELED, $customerId, $executorId);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
+        $this->assertEquals([], $availableActions);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
+        $this->assertEquals([], $availableActions);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
+        $this->assertEquals([], $availableActions);
+
+        $task = new Task(Task::STATUS_DONE, $customerId, $executorId);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
+        $this->assertEquals([], $availableActions);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
+        $this->assertEquals([], $availableActions);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
+        $this->assertEquals([], $availableActions);
+
+        $task = new Task(Task::STATUS_FAILED, $customerId, $executorId);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
+        $this->assertEquals([], $availableActions);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
+        $this->assertEquals([], $availableActions);
+
+        $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
+        $this->assertEquals([], $availableActions);
+    }
 }
