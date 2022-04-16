@@ -61,6 +61,7 @@ class Task
     public function getNewStatusByAction(string $actionType)
     {
         $statusByActionList = [
+            self::ACTION_RESPOND => self::STATUS_NEW,
             self::ACTION_START => self::STATUS_IN_PROGRESS,
             self::ACTION_REFUSE => self::STATUS_FAILED,
             self::ACTION_CANCEL => self::STATUS_CANCELED,
