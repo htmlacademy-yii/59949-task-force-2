@@ -1,7 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-
-require __DIR__ . '/../Task.php';
+use TaskForce\App\Models\Task;
 
 
 class TaskTest extends TestCase

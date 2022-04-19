@@ -1,4 +1,5 @@
 <?php
+namespace TaskForce\App\Models;
 
 
 class Task
