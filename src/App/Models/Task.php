@@ -81,7 +81,7 @@ class Task
                 if ($userId === $this->customerId) {
                     $actions = [self::ACTION_CANCEL];
                 } else {
-                    $actions = [self::ACTION_RESPOND];
+                    $actions = [(new RespondAction)->getCodeName()];
                 }
                 break;
             case self::STATUS_IN_PROGRESS:
