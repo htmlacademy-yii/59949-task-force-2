@@ -79,16 +79,16 @@ class Task
         switch ($this->status):
             case self::STATUS_NEW:
                 if ($userId === $this->customerId) {
-                    $actions = [self::ACTION_CANCEL];
+                    $actions = [(new CancelAction)->getCodeName()];
                 } else {
                     $actions = [(new RespondAction)->getCodeName()];
                 }
                 break;
             case self::STATUS_IN_PROGRESS:
                 if ($userId === $this->customerId) {
-                    $actions = [self::ACTION_FINISH];
+                    $actions = [(new FinishAction)->getCodeName()];
                 } else if ($userId === $this->executorId) {
-                    $actions = [self::ACTION_REFUSE];
+                    $actions = [(new RefuseAction)->getCodeName()];
                 }
                 break;
             default:
