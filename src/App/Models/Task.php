@@ -76,19 +76,24 @@ class Task
     {
         $actions = [];
 
+        $respondAction = new RespondAction;
+        $cancelAction = new CancelAction;
+        $refuseAction = new RefuseAction;
+        $finishAction = new FinishAction;
+
         switch ($this->status):
             case self::STATUS_NEW:
-                if ($userId === $this->customerId) {
-                    $actions = [(new CancelAction)->getCodeName()];
-                } else {
-                    $actions = [(new RespondAction)->getCodeName()];
+                if ($cancelAction->checkUserRights($userId, $this->executorId, $this->customerId)) {
+                    $actions = [$cancelAction->getCodeName()];
+                } else if ($respondAction->checkUserRights($userId, $this->executorId, $this->customerId)) {
+                    $actions = [$respondAction->getCodeName()];
                 }
                 break;
             case self::STATUS_IN_PROGRESS:
-                if ($userId === $this->customerId) {
-                    $actions = [(new FinishAction)->getCodeName()];
-                } else if ($userId === $this->executorId) {
-                    $actions = [(new RefuseAction)->getCodeName()];
+                if ($finishAction->checkUserRights($userId, $this->executorId, $this->customerId)) {
+                    $actions = [$finishAction->getCodeName()];
+                } else if ($refuseAction->checkUserRights($userId, $this->executorId, $this->customerId)) {
+                    $actions = [$refuseAction->getCodeName()];
                 }
                 break;
             default:
