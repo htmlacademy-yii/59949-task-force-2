@@ -44,27 +44,25 @@ class TaskTest extends TestCase
         $executorId = 2;
         $randomId = 3;
 
-        $task = new Task(Task::STATUS_NEW, $customerId);
+        $task = new Task(Task::STATUS_NEW, $customerId, $executorId);
+
         $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
         $this->assertEquals([Task::ACTION_CANCEL], $availableActions);
 
-        $task = new Task(Task::STATUS_NEW, $customerId, $executorId);
         $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
         $this->assertEquals([Task::ACTION_RESPOND], $availableActions);
 
-        $task = new Task(Task::STATUS_NEW, $customerId, $executorId);
         $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
-        $this->assertEquals([Task::ACTION_RESPOND], $availableActions);
+        $this->assertEquals([], $availableActions);
 
-        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId);
+        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId, $executorId);
+
         $availableActions = $task->getAvailableActionsByStatusAndUserId($customerId);
         $this->assertEquals([Task::ACTION_FINISH], $availableActions);
 
-        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId, $executorId);
         $availableActions = $task->getAvailableActionsByStatusAndUserId($executorId);
         $this->assertEquals([Task::ACTION_REFUSE], $availableActions);
 
-        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId, $executorId);
         $availableActions = $task->getAvailableActionsByStatusAndUserId($randomId);
         $this->assertEquals([], $availableActions);
 
