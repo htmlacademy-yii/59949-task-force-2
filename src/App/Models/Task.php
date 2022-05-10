@@ -46,6 +46,7 @@ class Task
         }
         catch (ParamNotExistsException $e) {
             error_log("Ошибка выполнения: " . $e->getMessage());
+            die();
         }
 
         $this->status = $status;
@@ -75,6 +76,7 @@ class Task
         }
         catch (ParamNotExistsException $e) {
             error_log("Ошибка выполнения: " . $e->getMessage());
+            die();
         }
 
         $statusByActionList = [
