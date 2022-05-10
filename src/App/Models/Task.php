@@ -53,22 +53,22 @@ class Task
         $this->executorId = $executorId;
     }
 
-    private function getStatusesMap()
+    private function getStatusesMap(): array
     {
         return self::STATUSES_MAP;
     }
 
-    private function getActionsMap()
+    private function getActionsMap(): array
     {
         return self::ACTIONS_MAP;
     }
 
-    public function getCurrentStatus(): string
+    public function getCurrentStatus(): ?string
     {
         return $this->status;
     }
 
-    public function getNewStatusByAction(string $actionType)
+    public function getNewStatusByAction(string $actionType): ?string
     {
         try {
             $this->checkActionExists($actionType);
@@ -88,7 +88,7 @@ class Task
         return $statusByActionList[$actionType] ?? null;
     }
 
-    public function getAvailableActionsByStatusAndUserId(int $userId)
+    public function getAvailableActionsByStatusAndUserId(int $userId): array
     {
         $actions = [];
 
@@ -122,7 +122,7 @@ class Task
     /**
      * @throws ParamNotExistsException
      */
-    private function checkStatusExists(string $status)
+    private function checkStatusExists(string $status): void
     {
         if (!array_key_exists($status, self::STATUSES_MAP)) {
             throw new ParamNotExistsException("Передан некорректный статус");
@@ -132,7 +132,7 @@ class Task
     /**
      * @throws ParamNotExistsException
      */
-    private function checkActionExists(string $action)
+    private function checkActionExists(string $action): void
     {
         if (!array_key_exists($action, self::ACTIONS_MAP)) {
             throw new ParamNotExistsException("Передано некорректное действие");
