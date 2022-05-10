@@ -70,6 +70,13 @@ class Task
 
     public function getNewStatusByAction(string $actionType)
     {
+        try {
+            $this->checkActionExists($actionType);
+        }
+        catch (ParamNotExistsException $e) {
+            error_log("Ошибка выполнения: " . $e->getMessage());
+        }
+
         $statusByActionList = [
             self::ACTION_RESPOND => self::STATUS_NEW,
             self::ACTION_START => self::STATUS_IN_PROGRESS,
@@ -119,6 +126,16 @@ class Task
     {
         if (!array_key_exists($status, self::STATUSES_MAP)) {
             throw new ParamNotExistsException("Передан некорректный статус");
+        }
+    }
+
+    /**
+     * @throws ParamNotExistsException
+     */
+    private function checkActionExists(string $action)
+    {
+        if (!array_key_exists($action, self::ACTIONS_MAP)) {
+            throw new ParamNotExistsException("Передано некорректное действие");
         }
     }
 }
