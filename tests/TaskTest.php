@@ -72,9 +72,6 @@ class TaskTest extends TestCase
 
         $newStatus = $task->getNewStatusByAction(Task::ACTION_FINISH);
         $this->assertEquals(Task::STATUS_DONE, $newStatus);
-
-        $newStatus = $task->getNewStatusByAction('missing status');
-        $this->assertEquals(null, $newStatus);
     }
 
     public function testGetAvailableActionsByStatusAndUserId(): void
