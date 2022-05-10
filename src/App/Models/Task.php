@@ -2,6 +2,8 @@
 namespace TaskForce\App\Models;
 
 
+use TaskForce\App\Exceptions\ParamNotExistsException;
+
 class Task
 {
     public $status;
@@ -39,6 +41,13 @@ class Task
 
     public function __construct(string $status, int $customerId, ?int $executorId = null)
     {
+        try {
+            $this->checkStatusExists($status);
+        }
+        catch (ParamNotExistsException $e) {
+            error_log("Ошибка выполнения: " . $e->getMessage());
+        }
+
         $this->status = $status;
         $this->customerId = $customerId;
         $this->executorId = $executorId;
@@ -101,5 +110,15 @@ class Task
         endswitch;
 
         return $actions;
+    }
+
+    /**
+     * @throws ParamNotExistsException
+     */
+    private function checkStatusExists(string $status)
+    {
+        if (!array_key_exists($status, self::STATUSES_MAP)) {
+            throw new ParamNotExistsException("Передан некорректный статус");
+        }
     }
 }
