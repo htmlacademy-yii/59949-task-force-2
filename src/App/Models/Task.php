@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace TaskForce\App\Models;
 
 
@@ -41,13 +41,7 @@ class Task
 
     public function __construct(string $status, int $customerId, ?int $executorId = null)
     {
-        try {
-            $this->checkStatusExists($status);
-        }
-        catch (ParamNotExistsException $e) {
-            error_log("Ошибка выполнения: " . $e->getMessage());
-            die();
-        }
+        $this->checkStatusExists($status);
 
         $this->status = $status;
         $this->customerId = $customerId;
@@ -71,13 +65,7 @@ class Task
 
     public function getNewStatusByAction(string $actionType): ?string
     {
-        try {
-            $this->checkActionExists($actionType);
-        }
-        catch (ParamNotExistsException $e) {
-            error_log("Ошибка выполнения: " . $e->getMessage());
-            die();
-        }
+        $this->checkActionExists($actionType);
 
         $statusByActionList = [
             self::ACTION_RESPOND => self::STATUS_NEW,
