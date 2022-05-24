@@ -7,21 +7,25 @@ use TaskForce\App\Models\Task;
 
 class TaskTest extends TestCase
 {
-    public function testThrowExceptionOnWrongParams(): void
+    public function testThrowExceptionOnTaskCreateWithWrongStatus(): void
     {
         $customerId = 1;
 
         $this->expectException(ParamNotExistsException::class);
         $this->expectExceptionMessage('Передан некорректный статус');
 
-        new Task('zzzzz', $customerId);
+        new Task('non-existent status', $customerId);
+    }
 
-        $task = new Task(Task::STATUS_NEW, $customerId);
+    public function testThrowExceptionOnGettingStatusByWrongAction(): void
+    {
+        $customerId = 1;
 
         $this->expectException(ParamNotExistsException::class);
         $this->expectExceptionMessage('Передано некорректное действие');
 
-        $task->getNewStatusByAction('zzzzz');
+        $task = new Task(Task::STATUS_NEW, $customerId);
+        $task->getNewStatusByAction('non-existent action');
     }
 
     public function testGetCurrentStatus(): void
