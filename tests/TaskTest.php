@@ -1,15 +1,58 @@
-<?php
+<?php declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
+use TaskForce\App\Exceptions\ParamNotExistsException;
 use TaskForce\App\Models\Task;
 
 
 class TaskTest extends TestCase
 {
+    public function testThrowExceptionOnTaskCreateWithWrongStatus(): void
+    {
+        $customerId = 1;
+
+        $this->expectException(ParamNotExistsException::class);
+        $this->expectExceptionMessage('Передан некорректный статус');
+
+        new Task('non-existent status', $customerId);
+    }
+
+    public function testThrowExceptionOnGettingStatusByWrongAction(): void
+    {
+        $customerId = 1;
+
+        $this->expectException(ParamNotExistsException::class);
+        $this->expectExceptionMessage('Передано некорректное действие');
+
+        $task = new Task(Task::STATUS_NEW, $customerId);
+        $task->getNewStatusByAction('non-existent action');
+    }
+
     public function testGetCurrentStatus(): void
     {
         $customerId = 1;
 
         $task = new Task(Task::STATUS_NEW, $customerId);
+        $status = $task->getCurrentStatus();
+        $this->assertEquals(Task::STATUS_NEW, $status);
+
+        $task = new Task(Task::STATUS_IN_PROGRESS, $customerId);
+        $status = $task->getCurrentStatus();
+        $this->assertEquals(Task::STATUS_IN_PROGRESS, $status);
+
+        $task = new Task(Task::STATUS_CANCELED, $customerId);
+        $status = $task->getCurrentStatus();
+        $this->assertEquals(Task::STATUS_CANCELED, $status);
+
+        $task = new Task(Task::STATUS_DONE, $customerId);
+        $status = $task->getCurrentStatus();
+        $this->assertEquals(Task::STATUS_DONE, $status);
+
+        $task = new Task(Task::STATUS_FAILED, $customerId);
+        $status = $task->getCurrentStatus();
+        $this->assertEquals(Task::STATUS_FAILED, $status);
+
+        $task = new Task('new', $customerId);
         $status = $task->getCurrentStatus();
         $this->assertEquals(Task::STATUS_NEW, $status);
     }
@@ -33,9 +76,6 @@ class TaskTest extends TestCase
 
         $newStatus = $task->getNewStatusByAction(Task::ACTION_FINISH);
         $this->assertEquals(Task::STATUS_DONE, $newStatus);
-
-        $newStatus = $task->getNewStatusByAction('missing status');
-        $this->assertEquals(null, $newStatus);
     }
 
     public function testGetAvailableActionsByStatusAndUserId(): void

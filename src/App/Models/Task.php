@@ -1,6 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace TaskForce\App\Models;
 
+
+use TaskForce\App\Exceptions\ParamNotExistsException;
 
 class Task
 {
@@ -39,28 +41,32 @@ class Task
 
     public function __construct(string $status, int $customerId, ?int $executorId = null)
     {
+        $this->checkStatusExists($status);
+
         $this->status = $status;
         $this->customerId = $customerId;
         $this->executorId = $executorId;
     }
 
-    private function getStatusesMap()
+    private function getStatusesMap(): array
     {
         return self::STATUSES_MAP;
     }
 
-    private function getActionsMap()
+    private function getActionsMap(): array
     {
         return self::ACTIONS_MAP;
     }
 
-    public function getCurrentStatus(): string
+    public function getCurrentStatus(): ?string
     {
         return $this->status;
     }
 
-    public function getNewStatusByAction(string $actionType)
+    public function getNewStatusByAction(string $actionType): ?string
     {
+        $this->checkActionExists($actionType);
+
         $statusByActionList = [
             self::ACTION_RESPOND => self::STATUS_NEW,
             self::ACTION_START => self::STATUS_IN_PROGRESS,
@@ -72,7 +78,7 @@ class Task
         return $statusByActionList[$actionType] ?? null;
     }
 
-    public function getAvailableActionsByStatusAndUserId(int $userId)
+    public function getAvailableActionsByStatusAndUserId(int $userId): array
     {
         $actions = [];
 
@@ -101,5 +107,25 @@ class Task
         endswitch;
 
         return $actions;
+    }
+
+    /**
+     * @throws ParamNotExistsException
+     */
+    private function checkStatusExists(string $status): void
+    {
+        if (!array_key_exists($status, self::STATUSES_MAP)) {
+            throw new ParamNotExistsException("Передан некорректный статус");
+        }
+    }
+
+    /**
+     * @throws ParamNotExistsException
+     */
+    private function checkActionExists(string $action): void
+    {
+        if (!array_key_exists($action, self::ACTIONS_MAP)) {
+            throw new ParamNotExistsException("Передано некорректное действие");
+        }
     }
 }
