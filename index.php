@@ -1,25 +1,46 @@
 <?php
 
-$tableName = 'categories';
+generateSQLQueryFile('categories', 'data/categories.csv', 'categoriesQuery.sql');
 
-$fileToRead = new SplFileObject("data/categories.csv", "r");
-$fileToWrite = new SplFileObject("categoriesQuery.sql", "w");
+function generateSQLQueryFile (string $tableName, string $csvFilePath, string $sqlFileName) {
+    $fileToRead = new SplFileObject($csvFilePath, "r");
+    $fileToWrite = new SplFileObject($sqlFileName, "w");
 
-$fileToRead->rewind();
+    $fileToRead->rewind();
 
-$fileLineAsArray = $fileToRead->fgetcsv();
-$fileLineAsString = implode(', ', $fileLineAsArray);
+    $headerColumns = getHeaderColumns($fileToRead);
 
-$fileToWrite->fwrite("INSERT INTO $tableName ($fileLineAsString) VALUES");
+    $sqlQuery = "INSERT INTO $tableName ($headerColumns) VALUES";
 
-while (!$fileToRead->eof()) {
-    $fileLineAsArray = $fileToRead->fgetcsv();
-    $fileLineAsString = implode("', '", $fileLineAsArray);
+    $fileToWrite->fwrite($sqlQuery);
 
-    $fileToWrite->fwrite("\n('$fileLineAsString'),");
+    foreach (getFileLines($fileToRead) as $fileLine) {
+        print($fileLine . '<br>');
+        $fileToWrite->fwrite("\n('$fileLine'),");
+    }
+
+    terminateFileInstruction($fileToWrite);
 }
 
-$currentFilePosition = $fileToWrite->ftell();
-$fileToWrite->ftruncate($currentFilePosition - 1);
-$fileToWrite->fseek($currentFilePosition - 1);
-$fileToWrite->fwrite(";\n");
+function getHeaderColumns ($file): string
+{
+    $fileLineAsArray = $file->fgetcsv();
+    return implode(', ', $fileLineAsArray);
+}
+
+function getFileLines (object $inputFile): Generator
+{
+    while (!$inputFile->eof()) {
+        $fileLineAsArray = $inputFile->fgetcsv();
+        yield implode("', '", $fileLineAsArray);
+    }
+}
+
+function terminateFileInstruction(object $file):void
+{
+    $currentFilePosition = $file->ftell();
+    $file->ftruncate($currentFilePosition - 1);
+    $file->fseek($currentFilePosition - 1);
+    $file->fwrite(";");
+    $file->fwrite("\n");
+}
