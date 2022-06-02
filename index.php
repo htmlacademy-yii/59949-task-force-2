@@ -1,8 +1,18 @@
 <?php
 
-generateSQLQueryFile('categories', 'data/categories.csv', 'categoriesQuery.sql');
+$cityHeaders = 'name, coordinates';
 
-function generateSQLQueryFile (string $tableName, string $csvFilePath, string $sqlFileName) {
+generateSQLQueryFile('data/categories.csv', 'categoriesQuery.sql', 'categories');
+generateSQLQueryFile('data/cities.csv', 'citiesQuery.sql', 'cities', $cityHeaders, true);
+
+function generateSQLQueryFile (
+    string $csvFilePath,
+    string $sqlFileName,
+    string $tableName,
+    ?string $customHeaders = null,
+    ?bool $isPoint = false
+)
+{
     $fileToRead = new SplFileObject($csvFilePath, "r");
     $fileToWrite = new SplFileObject($sqlFileName, "w");
 
@@ -10,13 +20,22 @@ function generateSQLQueryFile (string $tableName, string $csvFilePath, string $s
 
     $headerColumns = getHeaderColumns($fileToRead);
 
-    $sqlQuery = "INSERT INTO $tableName ($headerColumns) VALUES";
+    $headers = $customHeaders ?? $headerColumns;
+
+    $sqlQuery = "INSERT INTO $tableName ($headers) VALUES";
 
     $fileToWrite->fwrite($sqlQuery);
 
-    foreach (getFileLines($fileToRead) as $fileLine) {
-        print($fileLine . '<br>');
-        $fileToWrite->fwrite("\n('$fileLine'),");
+    if ($isPoint) {
+        foreach (getFileLines($fileToRead) as $fileLine) {
+            $fileLine = "'$fileLine[0]', POINT($fileLine[1], $fileLine[2])";
+            $fileToWrite->fwrite("\n($fileLine),");
+        }
+    } else {
+        foreach (getFileLines($fileToRead) as $fileLine) {
+            $fileLine = implode("', '", $fileLine);
+            $fileToWrite->fwrite("\n('$fileLine'),");
+        }
     }
 
     terminateFileInstruction($fileToWrite);
@@ -25,14 +44,16 @@ function generateSQLQueryFile (string $tableName, string $csvFilePath, string $s
 function getHeaderColumns ($file): string
 {
     $fileLineAsArray = $file->fgetcsv();
-    return implode(', ', $fileLineAsArray);
+    $fileLineAsString =  implode(', ', $fileLineAsArray);
+    $bom = "\xef\xbb\xbf";
+
+    return trim($fileLineAsString, $bom);
 }
 
 function getFileLines (object $inputFile): Generator
 {
     while (!$inputFile->eof()) {
-        $fileLineAsArray = $inputFile->fgetcsv();
-        yield implode("', '", $fileLineAsArray);
+        yield $inputFile->fgetcsv();
     }
 }
 
