@@ -3,7 +3,9 @@ namespace TaskForce\App\Helpers;
 
 
 use Generator;
+use RuntimeException;
 use SplFileObject;
+use TaskForce\App\Exceptions\SourceFileException;
 
 class CsvIntoSqlConverter
 {
@@ -28,20 +30,22 @@ class CsvIntoSqlConverter
         $this->isPoint = $isPoint;
     }
 
+    /**
+     * @throws SourceFileException
+     */
     public function generateFile():void
     {
-        $fileToRead = new SplFileObject($this->csvFilePath, "r");
-        $fileToWrite = new SplFileObject($this->sqlFileName, "w");
+        $this->checkFileExists($this->csvFilePath);
 
-        $fileToRead->rewind();
+        $fileToRead = $this->openFile($this->csvFilePath);
+
+        $fileToWrite = $this->createFile($this->sqlFileName);
 
         $headerColumns = $this->getFileHeaderColumns($fileToRead);
 
         $headers = $this->customHeaders ?? $headerColumns;
 
-        $sqlQuery = "INSERT INTO $this->tableName ($headers) VALUES";
-
-        $fileToWrite->fwrite($sqlQuery);
+        $this->createSQLQueryLine($headers, $fileToWrite);
 
         $this->writeDataIntoFile($fileToRead, $fileToWrite);
 
@@ -50,6 +54,7 @@ class CsvIntoSqlConverter
 
     private function getFileHeaderColumns($file): string
     {
+        $file->rewind();
         $fileLineAsArray = $file->fgetcsv();
         $fileLineAsString =  implode(', ', $fileLineAsArray);
         $bom = "\xef\xbb\xbf";
@@ -62,6 +67,12 @@ class CsvIntoSqlConverter
         while (!$inputFile->eof()) {
             yield $inputFile->fgetcsv();
         }
+    }
+
+    private function createSQLQueryLine(string $headers, object $file): void
+    {
+        $sqlQuery = "INSERT INTO $this->tableName ($headers) VALUES";
+        $file->fwrite($sqlQuery);
     }
 
     private function writeDataIntoFile(object $inputFile, object $outputFile): void
@@ -86,5 +97,33 @@ class CsvIntoSqlConverter
         $file->fseek($currentFilePosition - 1);
         $file->fwrite(";");
         $file->fwrite("\n");
+    }
+
+    /**
+     * @throws SourceFileException
+     */
+    private function checkFileExists($file): void
+    {
+        if (!file_exists($file)) {
+            throw new SourceFileException("Файл '$file' не существует");
+        }
+    }
+
+    /**
+     * @throws SourceFileException
+     */
+    private function openFile(string $file): ?object
+    {
+        try {
+            return new SplFileObject($file, "r");
+        }
+        catch (RuntimeException) {
+            throw new SourceFileException("Не удалось открыть файл '$file' на чтение");
+        }
+    }
+
+    private function createFile(string $fileName): object
+    {
+        return new SplFileObject($fileName, "w");
     }
 }
