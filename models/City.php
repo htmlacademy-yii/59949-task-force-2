@@ -5,11 +5,11 @@ namespace app\models;
 use Yii;
 
 /**
- * This is the model class for table "categories".
+ * This is the model class for table "cities".
  *
  * @property int $id
  * @property string $name
- * @property string $icon
+ * @property string|null $coordinates
  * @property string $created_at
  * @property string|null $updated_at
  * @property string|null $deleted_at
@@ -17,14 +17,14 @@ use Yii;
  * @property Tasks[] $tasks
  * @property Users[] $users
  */
-class Category extends \yii\db\ActiveRecord
+class City extends \yii\db\ActiveRecord
 {
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'categories';
+        return 'cities';
     }
 
     /**
@@ -33,10 +33,10 @@ class Category extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name', 'icon'], 'required'],
+            [['name'], 'required'],
+            [['coordinates'], 'string'],
             [['created_at', 'updated_at', 'deleted_at'], 'safe'],
-            [['name'], 'string', 'max' => 255],
-            [['icon'], 'string', 'max' => 100],
+            [['name'], 'string', 'max' => 100],
         ];
     }
 
@@ -48,7 +48,7 @@ class Category extends \yii\db\ActiveRecord
         return [
             'id' => 'ID',
             'name' => 'Name',
-            'icon' => 'Icon',
+            'coordinates' => 'Coordinates',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'deleted_at' => 'Deleted At',
@@ -62,7 +62,7 @@ class Category extends \yii\db\ActiveRecord
      */
     public function getTasks()
     {
-        return $this->hasMany(Task::class, ['category_id' => 'id'])->inverseOf('category');
+        return $this->hasMany(Task::class, ['city_id' => 'id'])->inverseOf('city');
     }
 
     /**
@@ -72,6 +72,6 @@ class Category extends \yii\db\ActiveRecord
      */
     public function getUsers()
     {
-        return $this->hasMany(User::class, ['category_id' => 'id'])->inverseOf('category');
+        return $this->hasMany(User::class, ['city_id' => 'id'])->inverseOf('city');
     }
 }
