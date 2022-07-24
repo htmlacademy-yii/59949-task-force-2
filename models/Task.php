@@ -20,6 +20,7 @@ use Yii;
  * @property string $created_at
  * @property string|null $updated_at
  * @property string|null $deleted_at
+ * @property string $description
  *
  * @property Categories $category
  * @property Cities $city
@@ -45,9 +46,9 @@ class Task extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'customer_id', 'category_id'], 'required'],
+            [['title', 'customer_id', 'category_id', 'description'], 'required'],
             [['budget', 'status', 'customer_id', 'executor_id', 'category_id', 'city_id'], 'integer'],
-            [['coordinates'], 'string'],
+            [['coordinates', 'description'], 'string'],
             [['expiry_dt', 'created_at', 'updated_at', 'deleted_at'], 'safe'],
             [['title'], 'string', 'max' => 255],
             [['customer_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['customer_id' => 'id']],
@@ -76,6 +77,7 @@ class Task extends \yii\db\ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
             'deleted_at' => 'Deleted At',
+            'description' => 'Description',
         ];
     }
 
