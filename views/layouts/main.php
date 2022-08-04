@@ -66,7 +66,7 @@ use yii\bootstrap4\Html;
     </header>
 
     <main role="main" class="flex-shrink-0">
-        <div class="main-container container">
+        <div class="main-content container">
             <?= $content; ?>
         </div>
     </main>

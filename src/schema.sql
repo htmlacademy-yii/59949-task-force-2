@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS tasks
     title       VARCHAR(255) NOT NULL,
     budget      INT          NULL,
     status      TINYINT      NOT NULL DEFAULT 1,
+    description TEXT         NOT NULL,
     customer_id INT UNSIGNED NOT NULL,
     executor_id INT UNSIGNED NULL,
     category_id INT UNSIGNED NOT NULL,
